@@ -13,6 +13,9 @@ app.use(
     useTempFiles: true
   })
 );
+// Routes
+app.use("/user", require("./routes/userRouter"));
+
 // Connection with DB
 const URI = process.env.MONGODB_URL;
 mongoose.connect(
