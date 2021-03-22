@@ -38,6 +38,36 @@ const userCtrl = {
       return res.status(500).json({ message: err.message });
     }
   },
+  login: async (req, res) => {
+    try {
+      const { email, password } = req.body;
+      const user = await Users.findOne({ email });
+      if (!user) return res.status(400).json({ message: "user not found" });
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (!isMatch)
+        return res.status(400).json({ message: "password is wrong" });
+
+      // WHEN LOGIN GOES SUCCESSFULLY
+      const accesstoken = createAccessToken({ id: user._id });
+      const refreshtoken = createRefreshToken({ id: user._id });
+      res.cookie("refreshtoken", refreshtoken, {
+        httpOnly: true,
+        path: "/user/refresh_token"
+      });
+
+      res.json({ accesstoken });
+    } catch (err) {
+      return res.status(500).json({ message: err.message });
+    }
+  },
+  logout: async (req, res) => {
+    try {
+      res.clearCookie("refreshtoken", { path: "/user/refresh_token" });
+      res.json({ message: "logged out" });
+    } catch (err) {
+      return res.status(500).json({ message: err.message });
+    }
+  },
   refreshToken: (req, res) => {
     try {
       const rf_token = req.cookies.refreshtoken;
