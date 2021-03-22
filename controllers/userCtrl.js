@@ -21,10 +21,44 @@ const userCtrl = {
         email,
         password: passwordHash
       });
-      // res.json({ message: "register success" });
-      res.json({ newUser });
-    } catch (err) {}
+      // Add user to DB(mongoDB) :
+      await newUser.save();
+
+      // Create jwt for authentication :
+
+      const accesstoken = createAccessToken({ id: newUser._id });
+      const refreshtoken = createRefreshToken({ id: newUser._id });
+      res.cookie("refreshtoken", refreshtoken, {
+        httpOnly: true,
+        path: "/user/refresh_token"
+      });
+
+      res.json({ accesstoken });
+    } catch (err) {
+      return res.status(500).json({ message: err.message });
+    }
+  },
+  refreshToken: (req, res) => {
+    try {
+      const rf_token = req.cookies.refreshtoken;
+      if (!rf_token)
+        return res.status(400).json({ message: "login or register" });
+
+      jwt.verify(rf_token, process.env.REFRESH_TOKEN_SECRET, (err, user) => {
+        if (err) return res.status(400).json({ message: "lgin or register" });
+        const accesstoken = createAccessToken({ id: user.id });
+        res.json({ accesstoken });
+      });
+    } catch (err) {
+      return res.status(500).json({ message: err.message });
+    }
   }
+};
+const createAccessToken = (user) => {
+  return jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "1d" });
+};
+const createRefreshToken = (user) => {
+  return jwt.sign(user, process.env.REFRESH_TOKEN_SECRET, { expiresIn: "7d" });
 };
 
 module.exports = userCtrl;
