@@ -23,15 +23,18 @@ mongoose.connect(
     useNewUrlParser: true,
     useUnifiedTopology: true
   },
-  err => {
+  (err) => {
     if (err) throw err;
     console.log("connect to DB");
   }
 );
 
-app.get("/", (req, res) => {
-  res.json({ msg: "WELCOME" });
-});
+// app.get("/", (req, res) => {
+//   res.json({ msg: "WELCOME" });
+// });
+// app.post("/", (req, res) => {
+//   res.json({ msg: "SUCCESS" });
+// });
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
