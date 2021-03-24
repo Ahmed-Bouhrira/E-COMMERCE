@@ -15,6 +15,7 @@ app.use(
 );
 // Routes
 app.use("/user", require("./routes/userRouter"));
+app.use("/api", require("./routes/categoryRouter"));
 
 // Connection with DB
 const URI = process.env.MONGODB_URL;
